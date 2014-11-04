@@ -1,7 +1,8 @@
 KajonaNightlyBuildInstaller
 ===========================
 
-Downloads the latest Kajona build to the current directory and installs the system using sqlite directly.
+Downloads the latest Kajona build (development snapshot) to the current directory and installs the system using sqlite directly.
+If the script succeeds, you'll get a fully operational Kajona installation with just one click.
 
 Call it either by commandline
 
