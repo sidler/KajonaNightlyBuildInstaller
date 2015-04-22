@@ -85,7 +85,6 @@ if($objOpen === TRUE) {
     $objZip->extractTo(__DIR__);
     $objZip->close();
     echo "... unzip successful\n";
-
 } else {
     echo "... failed to unzip.\n";
     return;
@@ -123,17 +122,39 @@ chdir(__DIR__."/kajona");
 echo "Including boostrap.php\n";
 require_once __DIR__.'/kajona/core/bootstrap.php';
 
+echo "Setting up admin-account\n";
+class_carrier::getInstance()->getObjSession()->setSession("install_username", "admin");
+class_carrier::getInstance()->getObjSession()->setSession("install_password", "demo");
+class_carrier::getInstance()->getObjSession()->setSession("install_email", "demo@kajona.de");
+
+
+
+//register a listener
+class class_installer_end_listener implements interface_genericevent_listener {
+
+    /**
+     * Callback-method invoked every time a records previd was changed.
+     * Please note that the event is only triggered on changes, not during a records creation.
+     *
+     * @param string $strEventName
+     * @param array $arrArguments
+     *
+     * @return bool
+     */
+    public function handleEvent($strEventName, array $arrArguments) {
+        class_response_object::getInstance()->setStrContent("");
+    }
+
+}
+class_core_eventdispatcher::getInstance()->removeAndAddListener(class_system_eventidentifier::EVENT_SYSTEM_REQUEST_ENDPROCESSING, new class_installer_end_listener());
+
+
 //fetch all output
 ob_start();
 require_once __DIR__.'/kajona/core/module_installer/installer.php';
 $strData = ob_get_clean();
 //and remove it :)
 @ob_end_clean();
-
-echo "Setting up admin-account\n";
-class_carrier::getInstance()->getObjSession()->setSession("install_username", "admin");
-class_carrier::getInstance()->getObjSession()->setSession("install_password", "demo");
-class_carrier::getInstance()->getObjSession()->setSession("install_email", "demo@kajona.de");
 
 
 echo "Calling all in one installer\n";
