@@ -129,37 +129,54 @@ class_carrier::getInstance()->getObjSession()->setSession("install_email", "demo
 
 
 
-//register a listener
-class class_installer_end_listener implements interface_genericevent_listener {
 
-    /**
-     * Callback-method invoked every time a records previd was changed.
-     * Please note that the event is only triggered on changes, not during a records creation.
-     *
-     * @param string $strEventName
-     * @param array $arrArguments
-     *
-     * @return bool
-     */
-    public function handleEvent($strEventName, array $arrArguments) {
-        class_response_object::getInstance()->setStrContent("");
-    }
+echo "Searching for packages to be installed...\n";
+$objManager = new class_module_packagemanager_manager();
+$arrPackageMetadata = $objManager->getAvailablePackages();
 
+$arrPackagesToInstall = array();
+foreach($arrPackageMetadata as $objOneMetadata) {
+    if(!in_array($objOneMetadata->getStrTitle(), array("samplecontent")))
+        $arrPackagesToInstall[] = $objOneMetadata;
 }
-class_core_eventdispatcher::getInstance()->removeAndAddListener(class_system_eventidentifier::EVENT_SYSTEM_REQUEST_ENDPROCESSING, new class_installer_end_listener());
+
+echo "Number of packages found: ".count($arrPackagesToInstall)."\n";
+
+$intMaxLoops = 0;
+while(count($arrPackagesToInstall) > 0 && ++$intMaxLoops < 100) {
+    foreach($arrPackagesToInstall as $intKey => $objOneMetadata) {
+
+        if(!$objOneMetadata->getBitProvidesInstaller()) {
+            unset($arrPackagesToInstall[$intKey]);
+            continue;
+        }
+
+        echo "Installing ".$objOneMetadata->getStrTitle()."...\n";
+        $objHandler = $objManager->getPackageManagerForPath($objOneMetadata->getStrPath());
+
+        if(!$objHandler->isInstallable()) {
+            continue;
+        }
+
+        $objHandler->installOrUpdate();
+        unset($arrPackagesToInstall[$intKey]);
+        $strReturn .= "\n";
+    }
+}
 
 
-//fetch all output
-ob_start();
-require_once __DIR__.'/kajona/core/module_installer/installer.php';
-$strData = ob_get_clean();
-//and remove it :)
-@ob_end_clean();
+echo "Installing samplecontent...\n";
+try {
+    $objHandler = $objManager->getPackageManagerForPath(class_resourceloader::getInstance()->getCorePathForModule("module_samplecontent")."/module_samplecontent");
+}
+catch(class_exception $objEx) {
+    $objHandler = null;
+}
+if($objHandler != null && $objHandler->isInstallable())
+    $strReturn .= $objHandler->installOrUpdate();
 
 
-echo "Calling all in one installer\n";
-$objInstaller = new class_installer();
-$objInstaller->processAutoInstall();
+
 chmod(__DIR__."/kajona/project/dbdumps/kajona.db3", 0777);
 
 echo "\n";
