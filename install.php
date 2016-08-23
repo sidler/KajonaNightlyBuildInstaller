@@ -91,7 +91,7 @@ if($objOpen === TRUE) {
 }
 
 echo "Setting up chmod...\n";
-chmod(__DIR__."/kajona/project/system/config", 0777);
+chmod(__DIR__."/kajona/project/module_system/system/config", 0777);
 chmod(__DIR__."/kajona/project/log", 0777);
 chmod(__DIR__."/kajona/project/dbdumps", 0777);
 chmod(__DIR__."/kajona/project/temp", 0777);
@@ -99,6 +99,7 @@ chmod(__DIR__."/kajona/templates", 0777);
 chmod(__DIR__."/kajona/templates/default", 0777);
 chmod(__DIR__."/kajona/files/cache", 0777);
 chmod(__DIR__."/kajona/files/images", 0777);
+chmod(__DIR__."/kajona/files/extract", 0777);
 chmod(__DIR__."/kajona/files/public", 0777);
 chmod(__DIR__."/kajona/files/downloads", 0777);
 chmod(__DIR__."/kajona/core", 0777);
@@ -116,11 +117,11 @@ $strConfig = <<<PHP
     \$config['dbport']               = 'n.a.';
 PHP;
 
-file_put_contents(__DIR__."/kajona/project/system/config/config.php", $strConfig);
+file_put_contents(__DIR__."/kajona/project/module_system/system/config/config.php", $strConfig);
 
 chdir(__DIR__."/kajona");
 echo "Including boostrap.php\n";
-require_once __DIR__.'/kajona/core/bootstrap.php';
+require_once 'phar://'.__DIR__.'/kajona/core/module_system.phar/bootstrap.php';
 
 echo "Setting up admin-account\n";
 class_carrier::getInstance()->getObjSession()->setSession("install_username", "admin");
@@ -160,7 +161,6 @@ while(count($arrPackagesToInstall) > 0 && ++$intMaxLoops < 100) {
 
         $objHandler->installOrUpdate();
         unset($arrPackagesToInstall[$intKey]);
-        $strReturn .= "\n";
     }
 }
 
@@ -169,7 +169,7 @@ echo "Installing samplecontent...\n";
 try {
     $objHandler = $objManager->getPackageManagerForPath(class_resourceloader::getInstance()->getCorePathForModule("module_samplecontent")."/module_samplecontent");
 }
-catch(class_exception $objEx) {
+catch(Kajona\System\System\Exception $objEx) {
     $objHandler = null;
 }
 if($objHandler != null && $objHandler->isInstallable())
