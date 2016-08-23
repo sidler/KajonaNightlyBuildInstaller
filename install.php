@@ -28,7 +28,7 @@ SOFTWARE.
 
 // Config Params
 const DOWNLOAD_WEBSITE = "https://www.kajona.de/nightly-builds.html";
-const DOWNLOAD_FILE_REGEX = '#<a href="(([a-zA-Z0-9/_\-\:\.])*(\.zip))+">(kajona_v4_allinone_([0-9\-])*\.zip)</a>#i';
+const DOWNLOAD_FILE_REGEX = '#<a href="(([a-zA-Z0-9/_\-\:\.])*(\.zip))+">(kajona_v5_allinone_([0-9\-])*\.zip)</a>#i';
 // /Config Params
 
 
