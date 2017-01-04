@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Stefan Idler, Idler IT-Services, http://www.mulchprod.de
+Copyright (c) 2015-2017 Stefan Idler, Idler IT-Services, http://www.mulchprod.de
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -96,7 +96,7 @@ chmod(__DIR__."/kajona/project/log", 0777);
 chmod(__DIR__."/kajona/project/dbdumps", 0777);
 chmod(__DIR__."/kajona/project/temp", 0777);
 chmod(__DIR__."/kajona/templates", 0777);
-chmod(__DIR__."/kajona/templates/default", 0777);
+//chmod(__DIR__."/kajona/templates/default", 0777);
 chmod(__DIR__."/kajona/files/cache", 0777);
 chmod(__DIR__."/kajona/files/images", 0777);
 chmod(__DIR__."/kajona/files/extract", 0777);
@@ -124,15 +124,15 @@ echo "Including boostrap.php\n";
 require_once 'phar://'.__DIR__.'/kajona/core/module_system.phar/bootstrap.php';
 
 echo "Setting up admin-account\n";
-class_carrier::getInstance()->getObjSession()->setSession("install_username", "admin");
-class_carrier::getInstance()->getObjSession()->setSession("install_password", "demo");
-class_carrier::getInstance()->getObjSession()->setSession("install_email", "demo@kajona.de");
+\Kajona\System\System\Carrier::getInstance()->getObjSession()->setSession("install_username", "admin");
+\Kajona\System\System\Carrier::getInstance()->getObjSession()->setSession("install_password", "demo");
+\Kajona\System\System\Carrier::getInstance()->getObjSession()->setSession("install_email", "demo@kajona.de");
 
 
 
 
 echo "Searching for packages to be installed...\n";
-$objManager = new class_module_packagemanager_manager();
+$objManager = new \Kajona\Packagemanager\System\PackagemanagerManager();
 $arrPackageMetadata = $objManager->getAvailablePackages();
 
 $arrPackagesToInstall = array();
@@ -166,6 +166,16 @@ while(count($arrPackagesToInstall) > 0 && ++$intMaxLoops < 100) {
 
 
 echo "Installing samplecontent...\n";
+foreach (\Kajona\Installer\System\SamplecontentInstallerHelper::getSamplecontentInstallers() as $objOneInstaller) {
+    if (!$objOneInstaller->isInstalled()) {
+     	\Kajona\Installer\System\SamplecontentInstallerHelper::install($objOneInstaller);  
+     	echo "Installing ".get_class($objOneInstaller)."\n";          
+    }
+}
+
+
+
+
 try {
     $objHandler = $objManager->getPackageManagerForPath(class_resourceloader::getInstance()->getCorePathForModule("module_samplecontent")."/module_samplecontent");
 }
